@@ -29,7 +29,10 @@ class foreman::install {
 
   package { $package:
     ensure  => $foreman::version,
-    require => $repo,
+    require => [
+      $repo,
+      User['foreman'],
+    ],
   }
 
   if $foreman::selinux or (str2bool($::selinux) and $foreman::selinux != false) {
