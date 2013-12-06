@@ -1,5 +1,7 @@
 # Configure foreman
-class foreman::config {
+class foreman::config (
+  $manage_user = false,
+) {
   Cron {
     require     => User[$foreman::user],
     user        => $foreman::user,
@@ -48,18 +50,20 @@ class foreman::config {
     before  => Class['foreman::service'],
   }
 
-  file { $foreman::app_root:
-    ensure  => directory,
-  }
+  if $manage_user {
+    file { $foreman::app_root:
+      ensure  => directory,
+    }
 
-  user { $foreman::user:
-    ensure  => 'present',
-    shell   => '/sbin/nologin',
-    comment => 'Foreman',
-    home    => $foreman::app_root,
-    gid     => $foreman::group,
-    groups  => $foreman::user_groups,
-    require => Class['foreman::install'],
+    user { $foreman::user:
+      ensure  => 'present',
+      shell   => '/sbin/nologin',
+      comment => 'Foreman',
+      home    => $foreman::app_root,
+      gid     => $foreman::group,
+      groups  => $foreman::user_groups,
+      require => Class['foreman::install'],
+    }
   }
 
   # remove crons previously installed here, they've moved to the package's
